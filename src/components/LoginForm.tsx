@@ -32,11 +32,10 @@ const LoginForm = () => {
     }
   };
 
-  const quickLogin = (role: 'hr' | 'interviewer' | 'candidate') => {
+  const quickLogin = (role: 'hr' | 'interviewer') => {
     const emails = {
       hr: 'hr@company.com',
-      interviewer: 'interviewer@company.com', 
-      candidate: 'candidate@company.com'
+      interviewer: 'interviewer@company.com'
     };
     setEmail(emails[role]);
     setPassword('password123');
@@ -125,14 +124,6 @@ const LoginForm = () => {
                   className="btn-secondary"
                 >
                   Login as Interviewer
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => quickLogin('candidate')}
-                  className="btn-secondary"
-                >
-                  Login as Candidate
                 </Button>
               </div>
             </div>

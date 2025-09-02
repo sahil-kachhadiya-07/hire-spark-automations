@@ -37,7 +37,6 @@ const DashboardLayout = ({ children, title, subtitle }: DashboardLayoutProps) =>
     switch (role) {
       case 'hr': return 'bg-primary text-primary-foreground';
       case 'interviewer': return 'bg-warning text-warning-foreground';
-      case 'candidate': return 'bg-success text-success-foreground';
       default: return 'bg-secondary text-secondary-foreground';
     }
   };
@@ -46,7 +45,6 @@ const DashboardLayout = ({ children, title, subtitle }: DashboardLayoutProps) =>
     switch (role) {
       case 'hr': return <Users className="h-3 w-3" />;
       case 'interviewer': return <Briefcase className="h-3 w-3" />;
-      case 'candidate': return <User className="h-3 w-3" />;
       default: return <User className="h-3 w-3" />;
     }
   };
@@ -121,10 +119,6 @@ const DashboardLayout = ({ children, title, subtitle }: DashboardLayoutProps) =>
               <DropdownMenuItem onClick={() => switchRole('interviewer')}>
                 <Briefcase className="mr-2 h-4 w-4" />
                 Switch to Interviewer
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => switchRole('candidate')}>
-                <User className="mr-2 h-4 w-4" />
-                Switch to Candidate
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={logout}>

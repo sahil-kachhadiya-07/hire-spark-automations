@@ -20,8 +20,7 @@ export const useAuth = () => {
       
       // Simple mock validation
       if (email && password) {
-        const role: UserRole = email.includes('hr') ? 'hr' : 
-                              email.includes('interviewer') ? 'interviewer' : 'candidate';
+        const role: UserRole = email.includes('hr') ? 'hr' : 'interviewer';
         
         const mockUser: User = {
           id: Date.now().toString(),

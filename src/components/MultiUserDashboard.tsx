@@ -121,15 +121,15 @@ const MultiUserDashboard = () => {
 
   const renderInterviewerDashboard = () => (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="card-dashboard">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Assigned Jobs</CardTitle>
-            <Briefcase className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Total Resumes</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3</div>
-            <p className="text-xs text-muted-foreground">Active assignments</p>
+            <div className="text-2xl font-bold">23</div>
+            <p className="text-xs text-muted-foreground">All applications</p>
           </CardContent>
         </Card>
 
@@ -139,132 +139,121 @@ const MultiUserDashboard = () => {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-primary">2</div>
-            <p className="text-xs text-muted-foreground">Scheduled for today</p>
+            <div className="text-2xl font-bold text-primary">3</div>
+            <p className="text-xs text-muted-foreground">Scheduled interviews</p>
           </CardContent>
         </Card>
 
         <Card className="card-dashboard">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pending Reviews</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <AlertCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-warning">5</div>
-            <p className="text-xs text-muted-foreground">Awaiting feedback</p>
+            <div className="text-2xl font-bold text-warning">8</div>
+            <p className="text-xs text-muted-foreground">Need feedback</p>
+          </CardContent>
+        </Card>
+
+        <Card className="card-dashboard">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Shortlisted</CardTitle>
+            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-success">6</div>
+            <p className="text-xs text-muted-foreground">Selected candidates</p>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="card-dashboard">
-        <CardHeader>
-          <CardTitle>Upcoming Interviews</CardTitle>
-          <CardDescription>Your scheduled interviews for this week</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {[
-              { candidate: 'Alex Thompson', job: 'Senior React Developer', time: 'Today, 2:00 PM', status: 'confirmed' },
-              { candidate: 'Maria Garcia', job: 'Senior React Developer', time: 'Today, 4:30 PM', status: 'confirmed' },
-              { candidate: 'David Kim', job: 'Product Manager', time: 'Tomorrow, 10:00 AM', status: 'pending' },
-              { candidate: 'Jennifer Liu', job: 'Senior React Developer', time: 'Tomorrow, 3:00 PM', status: 'confirmed' },
-            ].map((interview, index) => (
-              <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="space-y-1">
-                  <p className="font-medium">{interview.candidate}</p>
-                  <p className="text-sm text-muted-foreground">{interview.job}</p>
-                  <p className="text-xs text-muted-foreground">{interview.time}</p>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Badge className={interview.status === 'confirmed' ? 'bg-success text-success-foreground' : 'bg-warning text-warning-foreground'}>
-                    {interview.status}
-                  </Badge>
-                  <Button size="sm" variant="outline" className="btn-secondary">
-                    View Profile
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-
-  const renderCandidateDashboard = () => (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="card-dashboard">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Applications</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
+          <CardHeader>
+            <CardTitle>Resume Analytics</CardTitle>
+            <CardDescription>Recent applications and scoring</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">4</div>
-            <p className="text-xs text-muted-foreground">Total submitted</p>
+            <div className="space-y-4">
+              {[
+                { candidate: 'Alex Thompson', job: 'Senior React Developer', score: 92, status: 'shortlisted', source: 'LinkedIn' },
+                { candidate: 'Maria Garcia', job: 'Senior React Developer', score: 78, status: 'reviewed', source: 'Email' },
+                { candidate: 'David Kim', job: 'Product Manager', score: 85, status: 'pending', source: 'Website' },
+                { candidate: 'Jennifer Liu', job: 'Senior React Developer', score: 89, status: 'shortlisted', source: 'LinkedIn' },
+              ].map((resume, index) => (
+                <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex-1 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <p className="font-medium">{resume.candidate}</p>
+                      <Badge className="text-xs">{resume.source}</Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{resume.job}</p>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xs font-medium">Score: {resume.score}%</span>
+                      <Badge className={
+                        resume.status === 'shortlisted' ? 'bg-success text-success-foreground' :
+                        resume.status === 'reviewed' ? 'bg-primary text-primary-foreground' :
+                        'bg-warning text-warning-foreground'
+                      }>
+                        {resume.status}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button size="sm" variant="outline" className="btn-secondary">
+                      View Resume
+                    </Button>
+                    <Button size="sm" className="btn-primary">
+                      {resume.status === 'pending' ? 'Review' : 'Interview'}
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
 
         <Card className="card-dashboard">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Interviews</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+          <CardHeader>
+            <CardTitle>Candidate Actions</CardTitle>
+            <CardDescription>Select or reject candidates and manage interviews</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-success">2</div>
-            <p className="text-xs text-muted-foreground">Scheduled</p>
-          </CardContent>
-        </Card>
-
-        <Card className="card-dashboard">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Status</CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-sm font-bold text-primary">Shortlisted</div>
-            <p className="text-xs text-muted-foreground">Current status</p>
+            <div className="space-y-4">
+              {[
+                { candidate: 'Sarah Wilson', job: 'UX Designer', time: 'Today, 2:00 PM', action: 'interview' },
+                { candidate: 'Michael Brown', job: 'Backend Developer', time: 'Tomorrow, 10:00 AM', action: 'interview' },
+                { candidate: 'Lisa Chen', job: 'Product Manager', time: 'Pending Decision', action: 'review' },
+                { candidate: 'Robert Taylor', job: 'Frontend Developer', time: 'Pending Decision', action: 'review' },
+              ].map((item, index) => (
+                <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="space-y-1">
+                    <p className="font-medium">{item.candidate}</p>
+                    <p className="text-sm text-muted-foreground">{item.job}</p>
+                    <p className="text-xs text-muted-foreground">{item.time}</p>
+                  </div>
+                  <div className="flex space-x-2">
+                    {item.action === 'review' ? (
+                      <>
+                        <Button size="sm" variant="outline" className="text-red-600 border-red-600 hover:bg-red-50">
+                          Reject
+                        </Button>
+                        <Button size="sm" className="btn-primary">
+                          Select
+                        </Button>
+                      </>
+                    ) : (
+                      <Button size="sm" className="btn-primary">
+                        Start Interview
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>
-
-      <Card className="card-dashboard">
-        <CardHeader>
-          <CardTitle>Application Status</CardTitle>
-          <CardDescription>Track your job applications and interview progress</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {[
-              { job: 'Senior React Developer', company: 'TechCorp', status: 'Interview Scheduled', date: 'Today, 2:00 PM', stage: 'final' },
-              { job: 'Frontend Developer', company: 'StartupXYZ', status: 'Under Review', date: 'Applied 3 days ago', stage: 'review' },
-              { job: 'React Developer', company: 'BigTech Inc', status: 'Shortlisted', date: 'Applied 1 week ago', stage: 'shortlist' },
-              { job: 'UI Developer', company: 'DesignStudio', status: 'Application Sent', date: 'Applied 2 weeks ago', stage: 'applied' },
-            ].map((application, index) => (
-              <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="space-y-1">
-                  <p className="font-medium">{application.job}</p>
-                  <p className="text-sm text-muted-foreground">{application.company}</p>
-                  <p className="text-xs text-muted-foreground">{application.date}</p>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Badge className={
-                    application.stage === 'final' ? 'bg-success text-success-foreground' :
-                    application.stage === 'shortlist' ? 'bg-primary text-primary-foreground' :
-                    application.stage === 'review' ? 'bg-warning text-warning-foreground' :
-                    'bg-secondary text-secondary-foreground'
-                  }>
-                    {application.status}
-                  </Badge>
-                  <Button size="sm" variant="outline" className="btn-secondary">
-                    Details
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 
@@ -274,14 +263,12 @@ const MultiUserDashboard = () => {
         <h2 className="text-2xl font-bold capitalize">{user.role} Dashboard</h2>
         <p className="text-muted-foreground">
           {user.role === 'hr' && 'Manage recruitment processes and track hiring metrics'}
-          {user.role === 'interviewer' && 'Review candidates and conduct interviews'}
-          {user.role === 'candidate' && 'Track your applications and interview progress'}
+          {user.role === 'interviewer' && 'Review candidates, conduct interviews, and manage resume analytics'}
         </p>
       </div>
 
       {user.role === 'hr' && renderHRDashboard()}
       {user.role === 'interviewer' && renderInterviewerDashboard()}
-      {user.role === 'candidate' && renderCandidateDashboard()}
     </div>
   );
 };

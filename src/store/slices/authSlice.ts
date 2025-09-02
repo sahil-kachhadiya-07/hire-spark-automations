@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import Cookies from 'js-cookie';
 
-export type UserRole = 'hr' | 'interviewer' | 'candidate';
+export type UserRole = 'hr' | 'interviewer';
 
 export interface User {
   id: string;
@@ -39,13 +39,6 @@ const mockUsers: Record<UserRole, User> = {
     name: 'Michael Chen',
     email: 'michael@company.com',
     role: 'interviewer',
-    avatar: '/api/placeholder/40/40'
-  },
-  candidate: {
-    id: '3',
-    name: 'Emma Davis',
-    email: 'emma@candidate.com',
-    role: 'candidate',
     avatar: '/api/placeholder/40/40'
   }
 };
@@ -97,8 +90,7 @@ const authSlice = createSlice({
       const token = Cookies.get('hrms_token');
       if (token) {
         // Mock authentication - in real app, validate token with API
-        const roleFromToken = token.includes('hr') ? 'hr' : 
-                            token.includes('interviewer') ? 'interviewer' : 'candidate';
+        const roleFromToken = token.includes('hr') ? 'hr' : 'interviewer';
         state.user = mockUsers[roleFromToken];
         state.token = token;
         state.isAuthenticated = true;
