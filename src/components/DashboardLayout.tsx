@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import { UserRole } from '@/store/slices/authSlice';
+import { UserRole } from '@/types/auth.types';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
@@ -22,7 +22,7 @@ interface DashboardLayoutProps {
 }
 
 const DashboardLayout = ({ children, title, subtitle }: DashboardLayoutProps) => {
-  const { user, logout, switchRole } = useAuth();
+  const { user, logout } = useAuth();
   const location = useLocation();
 
   if (!user) return null;
@@ -89,7 +89,7 @@ const DashboardLayout = ({ children, title, subtitle }: DashboardLayoutProps) =>
 
         <div className="flex items-center space-x-4">
           <div className="text-right">
-            <p className="text-sm font-medium">{user.name}</p>
+            <p className="text-sm font-medium">{user.username}</p>
             <p className="text-xs text-muted-foreground">{user.email}</p>
           </div>
           
@@ -97,28 +97,24 @@ const DashboardLayout = ({ children, title, subtitle }: DashboardLayoutProps) =>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                  <AvatarImage src="" alt={user.username} />
+                  <AvatarFallback>{user.username.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <div className="flex items-center justify-start gap-2 p-2">
                 <div className="flex flex-col space-y-1 leading-none">
-                  <p className="font-medium">{user.name}</p>
+                  <p className="font-medium">{user.username}</p>
                   <p className="w-[200px] truncate text-sm text-muted-foreground">
                     {user.email}
                   </p>
                 </div>
               </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => switchRole('hr')}>
-                <Users className="mr-2 h-4 w-4" />
-                Switch to HR
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => switchRole('interviewer')}>
-                <Briefcase className="mr-2 h-4 w-4" />
-                Switch to Interviewer
+              <DropdownMenuItem disabled>
+                <User className="mr-2 h-4 w-4" />
+                Role: {user.role.toUpperCase()}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={logout}>

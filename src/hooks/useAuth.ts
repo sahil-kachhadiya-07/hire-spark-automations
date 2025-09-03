@@ -1,54 +1,67 @@
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '@/store';
-import { loginStart, loginSuccess, loginFailure, logout, switchRole, initializeAuth, UserRole, User } from '@/store/slices/authSlice';
+import { RootState, AppDispatch } from '@/store';
+import { 
+  signUpAsync, 
+  signInAsync, 
+  verifyTokenAsync, 
+  logoutAsync, 
+  clearError, 
+  clearAuth 
+} from '@/store/slices/authSlice';
+import { UserRole, SignUpRequest, SignInRequest } from '@/types/auth.types';
 import { useEffect } from 'react';
 
 export const useAuth = () => {
-  const dispatch = useDispatch();
-  const { user, isAuthenticated, token, loading } = useSelector((state: RootState) => state.auth);
+  const dispatch = useDispatch<AppDispatch>();
+  const { user, isAuthenticated, token, loading, error } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
-    dispatch(initializeAuth());
-  }, [dispatch]);
+    // Initialize auth by verifying existing token
+    if (token && !user) {
+      dispatch(verifyTokenAsync());
+    }
+  }, [dispatch, token, user]);
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    dispatch(loginStart());
-    
     try {
-      // Mock login - in real app, make API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Simple mock validation
-      if (email && password) {
-        const role: UserRole = email.includes('hr') ? 'hr' : 'interviewer';
-        
-        const mockUser: User = {
-          id: Date.now().toString(),
-          name: email.split('@')[0],
-          email,
-          role
-        };
-        
-        const mockToken = `mock_token_${role}_${Date.now()}`;
-        
-        dispatch(loginSuccess({ user: mockUser, token: mockToken }));
-        return true;
-      } else {
-        dispatch(loginFailure());
-        return false;
-      }
+      const signInData: SignInRequest = { email, password };
+      const result = await dispatch(signInAsync(signInData));
+      return signInAsync.fulfilled.match(result);
     } catch (error) {
-      dispatch(loginFailure());
       return false;
     }
   };
 
-  const handleLogout = () => {
-    dispatch(logout());
+  const signup = async (username: string, email: string, password: string, role: UserRole): Promise<boolean> => {
+    try {
+      const signUpData: SignUpRequest = { username, email, password, role };
+      const result = await dispatch(signUpAsync(signUpData));
+      return signUpAsync.fulfilled.match(result);
+    } catch (error) {
+      return false;
+    }
   };
 
-  const handleSwitchRole = (role: UserRole) => {
-    dispatch(switchRole(role));
+  const logout = async (): Promise<void> => {
+    try {
+      await dispatch(logoutAsync());
+    } catch (error) {
+      // Even if API call fails, clear local state
+      dispatch(clearAuth());
+    }
+  };
+
+  const clearAuthError = () => {
+    dispatch(clearError());
+  };
+
+  const verifyToken = async (): Promise<boolean> => {
+    try {
+      const result = await dispatch(verifyTokenAsync());
+      return verifyTokenAsync.fulfilled.match(result);
+    } catch (error) {
+      return false;
+    }
   };
 
   return {
@@ -56,8 +69,11 @@ export const useAuth = () => {
     isAuthenticated,
     token,
     loading,
+    error,
     login,
-    logout: handleLogout,
-    switchRole: handleSwitchRole
+    signup,
+    logout,
+    clearError: clearAuthError,
+    verifyToken
   };
 };

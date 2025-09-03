@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '@/store';
-import { deleteJob, setSelectedJob } from '@/store/slices/jobSlice';
+import { RootState, AppDispatch } from '@/store';
+import { fetchJobs, deleteJobAsync, setSelectedJob as setReduxSelectedJob, Job } from '@/store/slices/jobSlice';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +9,7 @@ import { Plus, Eye, Edit, Trash2, Calendar, User, TrendingUp } from 'lucide-reac
 import { format } from 'date-fns';
 import JobCreationModal from './JobCreationModal';
 import JobPostModal from './JobPostModal';
+import EditJobModal from './EditJobModal';
 import { useToast } from '@/hooks/use-toast';
 import {
   AlertDialog,
@@ -23,27 +24,61 @@ import {
 } from '@/components/ui/alert-dialog';
 
 const JobManagementDashboard = () => {
-  const dispatch = useDispatch();
-  const { jobs, loading } = useSelector((state: RootState) => state.jobs);
+  const dispatch = useDispatch<AppDispatch>();
+  const { jobs, loading, error } = useSelector((state: RootState) => state.jobs);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const { toast } = useToast();
 
-  const handleDeleteJob = (jobId: string) => {
-    dispatch(deleteJob(jobId));
-    toast({
-      title: "Job deleted",
-      description: "The job has been successfully deleted.",
-    });
+  // Fetch jobs when component mounts
+  useEffect(() => {
+    dispatch(fetchJobs(undefined));
+  }, [dispatch]);
+
+  // Show error toast if there's an error
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Error",
+        description: error,
+        variant: "destructive",
+      });
+    }
+  }, [error, toast]);
+
+  const handleDeleteJob = async (jobId: string) => {
+    try {
+      await dispatch(deleteJobAsync(jobId)).unwrap();
+      toast({
+        title: "Job deleted",
+        description: "The job has been successfully deleted.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete job. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleViewJobPost = (jobId: string) => {
     const job = jobs.find(j => j.id === jobId);
     if (job) {
-      dispatch(setSelectedJob(job));
+      dispatch(setReduxSelectedJob(job));
       setSelectedJobId(jobId);
       setIsPostModalOpen(true);
+    }
+  };
+
+  const handleEditJob = (jobId: string) => {
+    const job = jobs.find(j => j.id === jobId);
+    if (job) {
+      setSelectedJob(job);
+      setIsEditModalOpen(true);
     }
   };
 
@@ -195,7 +230,12 @@ const JobManagementDashboard = () => {
                     </Button>
                   )}
                   
-                  <Button variant="outline" size="sm" className="btn-secondary">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="btn-secondary"
+                    onClick={() => handleEditJob(job.id)}
+                  >
                     <Edit className="mr-1 h-4 w-4" />
                     Edit
                   </Button>
@@ -250,6 +290,12 @@ const JobManagementDashboard = () => {
       <JobCreationModal 
         open={isCreateModalOpen}
         onOpenChange={setIsCreateModalOpen}
+      />
+      
+      <EditJobModal
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        job={selectedJob}
       />
       
       <JobPostModal

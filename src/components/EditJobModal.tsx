@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { createJobAsync } from '@/store/slices/jobSlice';
+import { updateJobAsync } from '@/store/slices/jobSlice';
 import { AppDispatch } from '@/store';
 import { getInterviewers } from '@/services/api.service';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -11,10 +11,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { Job } from '@/store/slices/jobSlice';
 
-interface JobCreationModalProps {
+interface EditJobModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  job: Job | null;
 }
 
 interface Interviewer {
@@ -23,7 +25,7 @@ interface Interviewer {
   email: string;
 }
 
-const JobCreationModal = ({ open, onOpenChange }: JobCreationModalProps) => {
+const EditJobModal = ({ open, onOpenChange, job }: EditJobModalProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -32,8 +34,21 @@ const JobCreationModal = ({ open, onOpenChange }: JobCreationModalProps) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    interviewer: ''
+    interviewer: '',
+    status: 'draft'
   });
+
+  // Update form data when job changes
+  useEffect(() => {
+    if (job) {
+      setFormData({
+        title: job.title,
+        description: job.description,
+        interviewer: job.interviewer,
+        status: job.status
+      });
+    }
+  }, [job]);
 
   // Fetch interviewers when modal opens
   useEffect(() => {
@@ -70,6 +85,15 @@ const JobCreationModal = ({ open, onOpenChange }: JobCreationModalProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!job) {
+      toast({
+        title: "Error",
+        description: "No job selected for editing.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (interviewersLoading) {
       toast({
         title: "Please wait",
@@ -91,24 +115,25 @@ const JobCreationModal = ({ open, onOpenChange }: JobCreationModalProps) => {
     setLoading(true);
     
     try {
-      await dispatch(createJobAsync({
-        title: formData.title,
-        description: formData.description,
-        interviewer: formData.interviewer
+      await dispatch(updateJobAsync({
+        id: job.id,
+        data: {
+          title: formData.title,
+          description: formData.description,
+          interviewer: formData.interviewer,
+        }
       })).unwrap();
 
       toast({
-        title: "Job created successfully",
-        description: "Your job posting has been created and saved as draft.",
+        title: "Job updated successfully",
+        description: "Your job posting has been updated.",
       });
 
-      // Reset form and close modal
-      setFormData({ title: '', description: '', interviewer: '' });
       onOpenChange(false);
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Failed to create job. Please try again.",
+        description: error.message || "Failed to update job. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -120,13 +145,19 @@ const JobCreationModal = ({ open, onOpenChange }: JobCreationModalProps) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const statusOptions = [
+    { value: 'draft', label: 'Draft' },
+    { value: 'published', label: 'Published' },
+    { value: 'closed', label: 'Closed' }
+  ];
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Create New Job</DialogTitle>
+          <DialogTitle>Edit Job</DialogTitle>
           <DialogDescription>
-            Add a new job posting to your recruitment pipeline. Fill in the details below.
+            Update the job posting details below.
           </DialogDescription>
         </DialogHeader>
 
@@ -139,7 +170,7 @@ const JobCreationModal = ({ open, onOpenChange }: JobCreationModalProps) => {
               placeholder="e.g., Senior React Developer"
               value={formData.title}
               onChange={(e) => handleChange('title', e.target.value)}
-              disabled={loading}
+              disabled={loading || interviewersLoading}
             />
           </div>
 
@@ -151,7 +182,7 @@ const JobCreationModal = ({ open, onOpenChange }: JobCreationModalProps) => {
               placeholder="Describe the role, responsibilities, and requirements..."
               value={formData.description}
               onChange={(e) => handleChange('description', e.target.value)}
-              disabled={loading}
+              disabled={loading || interviewersLoading}
               rows={4}
             />
           </div>
@@ -199,6 +230,27 @@ const JobCreationModal = ({ open, onOpenChange }: JobCreationModalProps) => {
             </Select>
           </div>
 
+          {/* Status */}
+          <div className="space-y-2">
+            <Label htmlFor="status">Status</Label>
+            <Select
+              value={formData.status}
+              onValueChange={(value) => handleChange('status', value)}
+              disabled={loading || interviewersLoading}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                {statusOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Actions */}
           <div className="flex justify-end space-x-2 pt-4">
             <Button 
@@ -217,10 +269,10 @@ const JobCreationModal = ({ open, onOpenChange }: JobCreationModalProps) => {
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating...
+                  Updating...
                 </>
               ) : (
-                'Create Job'
+                'Update Job'
               )}
             </Button>
           </div>
@@ -230,4 +282,4 @@ const JobCreationModal = ({ open, onOpenChange }: JobCreationModalProps) => {
   );
 };
 
-export default JobCreationModal;
+export default EditJobModal;

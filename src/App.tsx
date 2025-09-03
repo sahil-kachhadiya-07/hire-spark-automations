@@ -7,6 +7,7 @@ import { Provider } from 'react-redux';
 import { store } from '@/store';
 import { useAuth } from '@/hooks/useAuth';
 import LoginForm from '@/components/LoginForm';
+import SignupForm from '@/components/SignUpForm';
 import DashboardLayout from '@/components/DashboardLayout';
 import JobManagementDashboard from '@/components/JobManagementDashboard';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
@@ -33,18 +34,18 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const AppRoutes = () => {
   const { isAuthenticated } = useAuth();
 
-  if (!isAuthenticated) {
-    return <LoginForm />;
-  }
-
   return (
     <Routes>
       <Route path="/" element={
-        <ProtectedRoute>
-          <DashboardLayout title="Dashboard Overview" subtitle="Welcome to your HRMS dashboard">
-            <MultiUserDashboard />
-          </DashboardLayout>
-        </ProtectedRoute>
+        isAuthenticated ? (
+          <ProtectedRoute>
+            <DashboardLayout title="Dashboard Overview" subtitle="Welcome to your HRMS dashboard">
+              <MultiUserDashboard />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ) : (
+          <Navigate to="/login" replace />
+        )
       } />
       
       <Route path="/jobs" element={
@@ -63,7 +64,14 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
       
-      <Route path="/login" element={<LoginForm />} />
+      <Route path="/login" element={
+        isAuthenticated ? <Navigate to="/" replace /> : <LoginForm />
+      } />
+      
+      <Route path="/signup" element={
+        isAuthenticated ? <Navigate to="/" replace /> : <SignupForm />
+      } />
+      
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

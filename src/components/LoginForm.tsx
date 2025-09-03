@@ -10,11 +10,12 @@ import { useToast } from '@/hooks/use-toast';
 const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login, loading } = useAuth();
+  const { login, loading, error, clearError } = useAuth();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    clearError(); // Clear any previous errors
     
     const success = await login(email, password);
     
@@ -26,19 +27,15 @@ const LoginForm = () => {
     } else {
       toast({
         title: "Login failed", 
-        description: "Please check your credentials and try again.",
+        description: error || "Please check your credentials and try again.",
         variant: "destructive",
       });
     }
   };
 
-  const quickLogin = (role: 'hr' | 'interviewer') => {
-    const emails = {
-      hr: 'hr@company.com',
-      interviewer: 'interviewer@company.com'
-    };
-    setEmail(emails[role]);
-    setPassword('password123');
+  const goToSignup = () => {
+    window.history.pushState({}, '', '/signup');
+    window.dispatchEvent(new PopStateEvent('popstate'));
   };
 
   return (
@@ -87,6 +84,13 @@ const LoginForm = () => {
                 />
               </div>
 
+              {/* API Error Display */}
+              {error && !loading && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                  <p className="text-sm text-red-600">{error}</p>
+                </div>
+              )}
+
               <Button 
                 type="submit" 
                 className="w-full btn-hero" 
@@ -103,28 +107,28 @@ const LoginForm = () => {
               </Button>
             </form>
 
-            {/* Quick Login Options */}
-            <div className="mt-6 pt-6 border-t">
-              <p className="text-sm text-muted-foreground text-center mb-3">
-                Quick Demo Login:
+            {/* Signup Link */}
+            <div className="mt-6 pt-6 border-t text-center">
+              <p className="text-sm text-muted-foreground">
+                Don't have an account?{' '}
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto font-semibold text-primary hover:underline"
+                  onClick={goToSignup}
+                >
+                  Create account
+                </Button>
               </p>
-              <div className="grid grid-cols-1 gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => quickLogin('hr')}
-                  className="btn-secondary"
-                >
-                  Login as HR Manager
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => quickLogin('interviewer')}
-                  className="btn-secondary"
-                >
-                  Login as Interviewer
-                </Button>
+            </div>
+
+            {/* Demo Information */}
+            <div className="mt-4 pt-4 border-t">
+              <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+                <p className="text-sm text-blue-700 font-medium mb-2">Demo Instructions:</p>
+                <p className="text-xs text-blue-600">
+                  Create an account with either "hr" or "interviewer" role to test the application. 
+                  Make sure the backend server is running on port 5000.
+                </p>
               </div>
             </div>
           </CardContent>
